@@ -18,4 +18,11 @@ async function createZone({ name, locationNote, gridX, gridY }) {
   return result.insertId;
 }
 
-module.exports = { getAllZones, getZoneById, createZone };
+async function updateZone(id, { name, locationNote, gridX, gridY }) {
+  await db.query(
+    'UPDATE garden_zones SET name = ?, location_note = ?, grid_x = ?, grid_y = ? WHERE id = ?',
+    [name, locationNote, gridX, gridY, id]
+  );
+}
+
+module.exports = { getAllZones, getZoneById, createZone, updateZone };

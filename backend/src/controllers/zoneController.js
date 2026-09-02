@@ -1,4 +1,4 @@
-const { getAllZones, createZone } = require('../models/zoneModel');
+const { getAllZones, getZoneById, createZone, updateZone } = require('../models/zoneModel');
 
 async function listZones(req, res) {
   try {
@@ -21,4 +21,24 @@ async function addZone(req, res) {
   }
 }
 
-module.exports = { listZones, addZone };
+async function editZone(req, res) {
+  try {
+    const existing = await getZoneById(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Zone not found' });
+
+    const { name, locationNote, gridX, gridY } = req.body;
+    if (!name) return res.status(400).json({ error: 'name is required' });
+
+    await updateZone(req.params.id, {
+      name,
+      locationNote,
+      gridX: gridX ?? existing.grid_x,
+      gridY: gridY ?? existing.grid_y,
+    });
+    res.json({ id: Number(req.params.id), name });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update zone', details: err.message });
+  }
+}
+
+module.exports = { listZones, addZone, editZone };
