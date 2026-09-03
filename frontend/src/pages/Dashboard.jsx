@@ -51,6 +51,19 @@ export default function Dashboard() {
       .catch(() => {});
   }, [selectedZoneId, readingsByZone]);
 
+  // Optimistically reflect a manual watering event before the next poll confirms it
+  function handleWatered(zoneId) {
+    setReadingsByZone((prev) => ({
+      ...prev,
+      [zoneId]: {
+        ...(prev[zoneId] || {}),
+        zone_id: zoneId,
+        moisture_percent: 70,
+        recorded_at: new Date().toISOString(),
+      },
+    }));
+  }
+
   return (
     <div className="p-6 h-screen flex flex-col">
       <h1 className="text-2xl font-semibold mb-1">Soil Moisture & Irrigation Advisor</h1>
@@ -65,7 +78,7 @@ export default function Dashboard() {
 
         {/* Dashboard panel */}
         <div className="flex flex-col gap-4 overflow-y-auto">
-          <StatusCards zones={zones} readingsByZone={readingsByZone} />
+          <StatusCards zones={zones} readingsByZone={readingsByZone} onWatered={handleWatered} />
 
           <div className="border rounded-lg p-3">
             <div className="flex justify-between items-center mb-2">

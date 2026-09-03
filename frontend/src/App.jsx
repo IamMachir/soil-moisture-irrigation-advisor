@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
 import CreateZone from './pages/CreateZone';
+import About from './pages/About';
 
 export default function App() {
   const [view, setView] = useState('dashboard');
@@ -21,13 +22,17 @@ export default function App() {
         >
           Add Zone
         </button>
+        <button
+          className={`text-sm px-3 py-1 rounded ${view === 'about' ? 'bg-emerald-700 text-white' : 'bg-gray-100'}`}
+          onClick={() => setView('about')}
+        >
+          About
+        </button>
       </div>
 
-      {view === 'dashboard' ? (
-        <Dashboard key={refreshKey} />
-      ) : (
-        <CreateZone onCreated={() => setRefreshKey((k) => k + 1)} />
-      )}
+      {view === 'dashboard' && <Dashboard key={refreshKey} />}
+      {view === 'create-zone' && <CreateZone onCreated={() => setRefreshKey((k) => k + 1)} />}
+      {view === 'about' && <About />}
     </div>
   );
 }

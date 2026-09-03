@@ -1,10 +1,27 @@
+import { useState } from 'react';
+import api from '../api/client';
+
 function statusColor(moisture) {
   if (moisture < 30) return 'bg-red-100 border-red-400 text-red-800';
   if (moisture < 60) return 'bg-yellow-100 border-yellow-400 text-yellow-800';
   return 'bg-green-100 border-green-400 text-green-800';
 }
 
-export default function StatusCards({ zones, readingsByZone }) {
+export default function StatusCards({ zones, readingsByZone, onWatered }) {
+  const [wateringZoneId, setWateringZoneId] = useState(null);
+
+  async function handleWaterNow(zoneId) {
+    setWateringZoneId(zoneId);
+    try {
+      await api.post('/irrigation-events/manual', { zoneId });
+      if (onWatered) onWatered(zoneId);
+    } catch (err) {
+      // Silently ignore for now; the next poll will reflect the real state either way
+    } finally {
+      setWateringZoneId(null);
+    }
+  }
+
   return (
     <div className="grid grid-cols-2 gap-3">
       {zones.map((zone) => {
@@ -19,7 +36,14 @@ export default function StatusCards({ zones, readingsByZone }) {
             <p className="text-2xl font-bold">
               {moisture !== null ? `${moisture}%` : '—'}
             </p>
-            <p className="text-xs opacity-75">{zone.location_note}</p>
+            <p className="text-xs opacity-75 mb-2">{zone.location_note}</p>
+            <button
+              onClick={() => handleWaterNow(zone.id)}
+              disabled={wateringZoneId === zone.id}
+              className="text-xs bg-blue-600 text-white rounded px-2 py-1 disabled:opacity-60"
+            >
+              {wateringZoneId === zone.id ? 'Watering…' : 'Water now'}
+            </button>
           </div>
         );
       })}
