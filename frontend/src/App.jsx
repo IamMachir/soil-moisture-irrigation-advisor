@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
 import CreateZone from './pages/CreateZone';
 import About from './pages/About';
+import IrrigationLog from './pages/IrrigationLog';
 
 export default function App() {
   const [view, setView] = useState('dashboard');
@@ -23,6 +24,12 @@ export default function App() {
           Add Zone
         </button>
         <button
+          className={`text-sm px-3 py-1 rounded ${view === 'log' ? 'bg-emerald-700 text-white' : 'bg-gray-100'}`}
+          onClick={() => setView('log')}
+        >
+          Irrigation Log
+        </button>
+        <button
           className={`text-sm px-3 py-1 rounded ${view === 'about' ? 'bg-emerald-700 text-white' : 'bg-gray-100'}`}
           onClick={() => setView('about')}
         >
@@ -32,6 +39,7 @@ export default function App() {
 
       {view === 'dashboard' && <Dashboard key={refreshKey} />}
       {view === 'create-zone' && <CreateZone onCreated={() => setRefreshKey((k) => k + 1)} />}
+      {view === 'log' && <IrrigationLog />}
       {view === 'about' && <About />}
     </div>
   );
