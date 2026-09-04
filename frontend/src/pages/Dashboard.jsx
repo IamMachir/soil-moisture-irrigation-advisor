@@ -18,8 +18,9 @@ export default function Dashboard() {
       .then((res) => {
         setZones(res.data);
         if (res.data.length > 0) setSelectedZoneId(res.data[0].id);
+        setError('');
       })
-      .catch(() => setError('Could not load zones. Is the backend running?'));
+      .catch(() => setError('Could not load zones. Is the backend running on the expected port?'));
   }, []);
 
   // Poll latest readings periodically (simulates a live feed)
@@ -33,8 +34,11 @@ export default function Dashboard() {
             map[r.zone_id] = r;
           });
           setReadingsByZone(map);
+          setError('');
         })
-        .catch(() => setError('Could not load live readings.'));
+        .catch(() =>
+          setError('Could not reach the backend for live readings. Check that the server and simulator are running.')
+        );
     }
 
     fetchLatest();
@@ -68,7 +72,11 @@ export default function Dashboard() {
     <div className="p-6 h-screen flex flex-col">
       <h1 className="text-2xl font-semibold mb-1">Soil Moisture & Irrigation Advisor</h1>
       <p className="text-sm text-gray-500 mb-4">Live campus garden overview (simulated sensor feed)</p>
-      {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+      {error && (
+        <div className="bg-red-100 border border-red-300 text-red-800 text-sm rounded-lg p-3 mb-4">
+          {error}
+        </div>
+      )}
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
         {/* 3D scene */}
