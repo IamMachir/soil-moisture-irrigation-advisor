@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: soil-moisture-irrigation-advisor-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: MOISTURE_THRESHOLD
+        value: 30
+
+  - type: worker
+    name: soil-moisture-sensor-simulator
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm run simulate
+    envVars:
+      - key: SIMULATOR_API_URL
+        fromService:
+          type: web
+          name: soil-moisture-irrigation-advisor-backend
+          property: hostport
+      - key: SIMULATOR_ZONE_COUNT
+        value: 4
+      - key: SIMULATOR_INTERVAL_MS
+        value: 5000
+      - key: SIMULATOR_DAY_MINUTES
+        value: 10

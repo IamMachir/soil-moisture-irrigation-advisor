@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "simulate": "node src/simulator/sensorSimulator.js"
+    "simulate": "node src/simulator/sensorSimulator.js",
+    "seed": "node src/seed.js"
   },
   "dependencies": {
     "axios": "^1.7.2",
