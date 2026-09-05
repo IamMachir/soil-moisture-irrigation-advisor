@@ -19,6 +19,10 @@ const zoneRules = [
   body('name').trim().notEmpty().withMessage('name is required'),
   body('gridX').optional().isInt().withMessage('gridX must be an integer'),
   body('gridY').optional().isInt().withMessage('gridY must be an integer'),
+  body('moistureThreshold')
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('moistureThreshold must be a number between 0 and 100'),
 ];
 
 const manualWaterRules = [

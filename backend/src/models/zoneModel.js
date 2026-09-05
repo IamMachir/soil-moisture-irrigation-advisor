@@ -10,18 +10,18 @@ async function getZoneById(id) {
   return rows[0] || null;
 }
 
-async function createZone({ name, locationNote, gridX, gridY }) {
+async function createZone({ name, locationNote, gridX, gridY, moistureThreshold }) {
   const [result] = await db.query(
-    'INSERT INTO garden_zones (name, location_note, grid_x, grid_y) VALUES (?, ?, ?, ?)',
-    [name, locationNote, gridX || 0, gridY || 0]
+    'INSERT INTO garden_zones (name, location_note, grid_x, grid_y, moisture_threshold) VALUES (?, ?, ?, ?, ?)',
+    [name, locationNote, gridX || 0, gridY || 0, moistureThreshold ?? 30]
   );
   return result.insertId;
 }
 
-async function updateZone(id, { name, locationNote, gridX, gridY }) {
+async function updateZone(id, { name, locationNote, gridX, gridY, moistureThreshold }) {
   await db.query(
-    'UPDATE garden_zones SET name = ?, location_note = ?, grid_x = ?, grid_y = ? WHERE id = ?',
-    [name, locationNote, gridX, gridY, id]
+    'UPDATE garden_zones SET name = ?, location_note = ?, grid_x = ?, grid_y = ?, moisture_threshold = ? WHERE id = ?',
+    [name, locationNote, gridX, gridY, moistureThreshold, id]
   );
 }
 

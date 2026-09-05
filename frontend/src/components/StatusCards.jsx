@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import api from '../api/client';
 
-function statusColor(moisture) {
-  if (moisture < 30) return 'bg-red-100 border-red-400 text-red-800';
-  if (moisture < 60) return 'bg-yellow-100 border-yellow-400 text-yellow-800';
+function statusColor(moisture, threshold) {
+  if (moisture < threshold) return 'bg-red-100 border-red-400 text-red-800';
+  if (moisture < threshold + 30) return 'bg-yellow-100 border-yellow-400 text-yellow-800';
   return 'bg-green-100 border-green-400 text-green-800';
 }
 
@@ -27,16 +27,18 @@ export default function StatusCards({ zones, readingsByZone, onWatered }) {
       {zones.map((zone) => {
         const reading = readingsByZone[zone.id];
         const moisture = reading ? reading.moisture_percent : null;
+        const threshold = Number(zone.moisture_threshold ?? 30);
         return (
           <div
             key={zone.id}
-            className={`border rounded-lg p-3 ${moisture !== null ? statusColor(moisture) : 'bg-gray-50 border-gray-300'}`}
+            className={`border rounded-lg p-3 ${moisture !== null ? statusColor(moisture, threshold) : 'bg-gray-50 border-gray-300'}`}
           >
             <p className="font-medium text-sm">{zone.name}</p>
             <p className="text-2xl font-bold">
               {moisture !== null ? `${moisture}%` : '—'}
             </p>
-            <p className="text-xs opacity-75 mb-2">{zone.location_note}</p>
+            <p className="text-xs opacity-75">{zone.location_note}</p>
+            <p className="text-xs opacity-60 mb-2">Waters below {threshold}%</p>
             <button
               onClick={() => handleWaterNow(zone.id)}
               disabled={wateringZoneId === zone.id}

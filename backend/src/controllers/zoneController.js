@@ -11,10 +11,10 @@ async function listZones(req, res) {
 
 async function addZone(req, res) {
   try {
-    const { name, locationNote, gridX, gridY } = req.body;
+    const { name, locationNote, gridX, gridY, moistureThreshold } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
 
-    const id = await createZone({ name, locationNote, gridX, gridY });
+    const id = await createZone({ name, locationNote, gridX, gridY, moistureThreshold });
     res.status(201).json({ id, name });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create zone', details: err.message });
@@ -26,7 +26,7 @@ async function editZone(req, res) {
     const existing = await getZoneById(req.params.id);
     if (!existing) return res.status(404).json({ error: 'Zone not found' });
 
-    const { name, locationNote, gridX, gridY } = req.body;
+    const { name, locationNote, gridX, gridY, moistureThreshold } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
 
     await updateZone(req.params.id, {
@@ -34,6 +34,7 @@ async function editZone(req, res) {
       locationNote,
       gridX: gridX ?? existing.grid_x,
       gridY: gridY ?? existing.grid_y,
+      moistureThreshold: moistureThreshold ?? existing.moisture_threshold,
     });
     res.json({ id: Number(req.params.id), name });
   } catch (err) {

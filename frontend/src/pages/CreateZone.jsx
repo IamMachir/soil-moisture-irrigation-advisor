@@ -2,7 +2,7 @@ import { useState } from 'react';
 import api from '../api/client';
 
 export default function CreateZone({ onCreated }) {
-  const [form, setForm] = useState({ name: '', locationNote: '', gridX: 0, gridY: 0 });
+  const [form, setForm] = useState({ name: '', locationNote: '', gridX: 0, gridY: 0, moistureThreshold: 30 });
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -28,9 +28,10 @@ export default function CreateZone({ onCreated }) {
         locationNote: form.locationNote,
         gridX: Number(form.gridX),
         gridY: Number(form.gridY),
+        moistureThreshold: Number(form.moistureThreshold),
       });
       setMessage(`Zone "${form.name}" created.`);
-      setForm({ name: '', locationNote: '', gridX: 0, gridY: 0 });
+      setForm({ name: '', locationNote: '', gridX: 0, gridY: 0, moistureThreshold: 30 });
       if (onCreated) onCreated();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create zone.');
@@ -76,6 +77,19 @@ export default function CreateZone({ onCreated }) {
               onChange={(e) => update('gridY', e.target.value)}
             />
           </div>
+        </div>
+        <div>
+          <label className="text-sm text-gray-600">
+            Watering threshold (% moisture below which this zone gets auto-watered)
+          </label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            className="border rounded px-3 py-2 w-full"
+            value={form.moistureThreshold}
+            onChange={(e) => update('moistureThreshold', e.target.value)}
+          />
         </div>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         {message && <p className="text-emerald-700 text-sm">{message}</p>}

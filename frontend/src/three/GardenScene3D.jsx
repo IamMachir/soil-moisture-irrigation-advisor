@@ -135,13 +135,14 @@ export default function GardenScene3D({ zones, readingsByZone }) {
         if (!plot || !reading) return;
 
         const moisture = reading.moisture_percent;
+        const threshold = Number(zone.moisture_threshold ?? 30);
         let color;
-        if (moisture < 30) color = 0xb45309; // dry - brownish red
-        else if (moisture < 60) color = 0xca8a04; // moderate - amber
+        if (moisture < threshold) color = 0xb45309; // dry - brownish red
+        else if (moisture < threshold + 30) color = 0xca8a04; // moderate - amber
         else color = 0x16a34a; // wet - green
         plot.material.color.setHex(color);
 
-        sprinkler.visible = moisture < 30;
+        sprinkler.visible = moisture < threshold;
         if (sprinkler.visible) {
           sprinkler.scale.y = 1 + Math.sin(Date.now() / 200) * 0.15;
         }
