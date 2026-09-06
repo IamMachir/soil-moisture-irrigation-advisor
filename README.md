@@ -84,6 +84,15 @@ npm run seed
 
 This backfills 48 hours of realistic moisture history (with a day/night cycle and matching irrigation events for low-moisture points) per zone, so the dashboard's chart and irrigation log aren't empty the moment you open it — before the live simulator has built up its own history. Safe to re-run; it skips zones that already have readings.
 
+### Run tests
+
+```bash
+cd backend
+npm test
+```
+
+Covers input validation rules and the rule-based irrigation advisor — including per-zone threshold behavior (e.g. confirming a zone with a 50% threshold waters earlier than one using the old global 30% default) — using Jest with mocked models, no database connection required.
+
 ### Frontend
 
 ```bash
