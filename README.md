@@ -2,6 +2,19 @@
 
 A web dashboard that helps campus grounds staff and gardening clubs keep plants healthy without guesswork. Low-cost soil moisture sensors placed in garden beds feed the system, which displays live moisture levels, tracks trends over time, and gives clear watering recommendations per garden zone — including a 3D visualization of the garden that color-codes each plot by moisture level.
 
+## Group Members
+
+Section 1 · Computer Science and Engineering (CSE), except Dereje Bogale (Software Engineering) · 5th Year, except Biruk Tesfaye and Epherem Tesfaye (6th Year)
+
+| ID | Name |
+|---|---|
+| UGE/24145/13 | Biruk Tesfaye |
+| UGE/27686/14 | Dereje Bogale |
+| UGE/27834/14 | Efa Mirkana Abdisa |
+| UGE/24149/13 | Epherem Tesfaye |
+| UGE/27638/14 | Machir Tadesse Woldemariam |
+| UGE/27831/14 | Musbha Rida |
+
 ## Tech Stack
 
 **Frontend**
