@@ -3,6 +3,7 @@ import api from '../api/client';
 import GardenScene3D from '../three/GardenScene3D';
 import StatusCards from '../components/StatusCards';
 import MoistureChart from '../components/MoistureChart';
+import AttentionAlerts from '../components/AttentionAlerts';
 
 export default function Dashboard() {
   const [zones, setZones] = useState([]);
@@ -13,15 +14,19 @@ export default function Dashboard() {
 
   // Load zones once
   useEffect(() => {
+    loadZones();
+  }, []);
+
+  function loadZones() {
     api
       .get('/zones')
       .then((res) => {
         setZones(res.data);
-        if (res.data.length > 0) setSelectedZoneId(res.data[0].id);
+        if (res.data.length > 0 && !selectedZoneId) setSelectedZoneId(res.data[0].id);
         setError('');
       })
       .catch(() => setError('Could not load zones. Is the backend running on the expected port?'));
-  }, []);
+  }
 
   // Poll latest readings periodically (simulates a live feed)
   useEffect(() => {
@@ -77,6 +82,7 @@ export default function Dashboard() {
           {error}
         </div>
       )}
+      <AttentionAlerts zones={zones} readingsByZone={readingsByZone} />
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
         {/* 3D scene */}
@@ -86,7 +92,7 @@ export default function Dashboard() {
 
         {/* Dashboard panel */}
         <div className="flex flex-col gap-4 overflow-y-auto">
-          <StatusCards zones={zones} readingsByZone={readingsByZone} onWatered={handleWatered} />
+          <StatusCards zones={zones} readingsByZone={readingsByZone} onWatered={handleWatered} onDeleted={loadZones} />
 
           <div className="border rounded-lg p-3">
             <div className="flex justify-between items-center mb-2">

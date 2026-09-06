@@ -7,8 +7,9 @@ function statusColor(moisture, threshold) {
   return 'bg-green-100 border-green-400 text-green-800';
 }
 
-export default function StatusCards({ zones, readingsByZone, onWatered }) {
+export default function StatusCards({ zones, readingsByZone, onWatered, onDeleted }) {
   const [wateringZoneId, setWateringZoneId] = useState(null);
+  const [deletingZoneId, setDeletingZoneId] = useState(null);
 
   async function handleWaterNow(zoneId) {
     setWateringZoneId(zoneId);
@@ -19,6 +20,19 @@ export default function StatusCards({ zones, readingsByZone, onWatered }) {
       // Silently ignore for now; the next poll will reflect the real state either way
     } finally {
       setWateringZoneId(null);
+    }
+  }
+
+  async function handleDelete(zoneId, zoneName) {
+    if (!window.confirm(`Remove "${zoneName}"? This cannot be undone.`)) return;
+    setDeletingZoneId(zoneId);
+    try {
+      await api.delete(`/zones/${zoneId}`);
+      if (onDeleted) onDeleted();
+    } catch (err) {
+      // ignore; zone stays visible if deletion failed
+    } finally {
+      setDeletingZoneId(null);
     }
   }
 
@@ -33,7 +47,17 @@ export default function StatusCards({ zones, readingsByZone, onWatered }) {
             key={zone.id}
             className={`border rounded-lg p-3 ${moisture !== null ? statusColor(moisture, threshold) : 'bg-gray-50 border-gray-300'}`}
           >
-            <p className="font-medium text-sm">{zone.name}</p>
+            <div className="flex justify-between items-start">
+              <p className="font-medium text-sm">{zone.name}</p>
+              <button
+                onClick={() => handleDelete(zone.id, zone.name)}
+                disabled={deletingZoneId === zone.id}
+                className="text-xs text-red-600 hover:underline disabled:opacity-60"
+                title="Remove zone"
+              >
+                {deletingZoneId === zone.id ? '…' : '✕'}
+              </button>
+            </div>
             <p className="text-2xl font-bold">
               {moisture !== null ? `${moisture}%` : '—'}
             </p>

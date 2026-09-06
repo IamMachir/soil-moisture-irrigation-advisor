@@ -1,4 +1,4 @@
-const { getAllZones, getZoneById, createZone, updateZone } = require('../models/zoneModel');
+const { getAllZones, getZoneById, createZone, updateZone, deleteZone } = require('../models/zoneModel');
 
 async function listZones(req, res) {
   try {
@@ -42,4 +42,16 @@ async function editZone(req, res) {
   }
 }
 
-module.exports = { listZones, addZone, editZone };
+async function removeZone(req, res) {
+  try {
+    const existing = await getZoneById(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Zone not found' });
+
+    await deleteZone(req.params.id);
+    res.json({ message: 'Zone deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete zone', details: err.message });
+  }
+}
+
+module.exports = { listZones, addZone, editZone, removeZone };

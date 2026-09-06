@@ -25,4 +25,8 @@ async function updateZone(id, { name, locationNote, gridX, gridY, moistureThresh
   );
 }
 
-module.exports = { getAllZones, getZoneById, createZone, updateZone };
+async function deleteZone(id) {
+  await db.query('DELETE FROM garden_zones WHERE id = ?', [id]);
+}
+
+module.exports = { getAllZones, getZoneById, createZone, updateZone, deleteZone };
