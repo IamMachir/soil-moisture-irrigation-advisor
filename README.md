@@ -4,7 +4,7 @@ A web dashboard that helps campus grounds staff and gardening clubs keep plants 
 
 ## Group Members
 
-Section 1 · Computer Science and Engineering (CSE), except Dereje Bogale (Software Engineering) · 5th Year, except Biruk Tesfaye and Epherem Tesfaye (6th Year)
+Section 1 · Computer Science and Engineering (CSE), except Dereje Bogale (Software Engineering) · 5th Year, except Biruk Tesfaye, Elsabet Negash, and Epherem Tesfaye (6th Year)
 
 | ID | Name |
 |---|---|
