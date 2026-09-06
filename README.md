@@ -11,6 +11,7 @@ Section 1 · Computer Science and Engineering (CSE), except Dereje Bogale (Softw
 | UGE/24145/13 | Biruk Tesfaye |
 | UGE/27686/14 | Dereje Bogale |
 | UGE/27834/14 | Efa Mirkana Abdisa |
+| UGE/24133/13 | Elsabet Negash |
 | UGE/24149/13 | Epherem Tesfaye |
 | UGE/27638/14 | Machir Tadesse Woldemariam |
 | UGE/27831/14 | Musbha Rida |

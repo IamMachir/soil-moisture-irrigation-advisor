@@ -2,6 +2,7 @@ const members = [
   { id: 'UGE/24145/13', name: 'Biruk Tesfaye' },
   { id: 'UGE/27686/14', name: 'Dereje Bogale' },
   { id: 'UGE/27834/14', name: 'Efa Mirkana Abdisa' },
+  { id: 'UGE/24133/13', name: 'Elsabet Negash' },
   { id: 'UGE/24149/13', name: 'Epherem Tesfaye' },
   { id: 'UGE/27638/14', name: 'Machir Tadesse Woldemariam' },
   { id: 'UGE/27831/14', name: 'Musbha Rida' },
