@@ -110,6 +110,14 @@ The frontend expects the backend at `http://localhost:5001/api` (configurable vi
 3. The dashboard polls `/api/readings/latest` for live status cards and a Three.js 3D scene, and `/api/readings/history/:zoneId` for the moisture trend chart.
 4. In the 3D scene, each garden plot is color-coded (red = dry, amber = moderate, green = well-watered), and an animated sprinkler cue appears on zones currently below threshold.
 
+## IETP5201 Guide Compliance
+
+The IETP guide (unlike the Capstone guide) doesn't mandate specific software architecture/security/testing domains — it's centered on the multidisciplinary engineering project cycle. Checked against it:
+
+- **Team size (3–10)**: 7 members — compliant.
+- **Prototype/Simulation Development**: satisfied by this dashboard + 3D garden scene.
+- **Not covered here (non-code, requires team/advisor input)**: project proposal document, A0 poster, oral presentation, progress reports to the advisor, and the 30–45 page final report. These need real project-specific content (advisor name, meeting dates, lab safety notes, etc.) that only the team can supply — happy to draft templates for any of these on request.
+
 ## Deployment
 
 - **Backend + simulator**: `render.yaml` defines two services for [Render](https://render.com) — the API server and the sensor simulator as a background worker, wired together automatically. Railway works similarly if preferred.
