@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
+import Simulation from './pages/Simulation';
 import CreateZone from './pages/CreateZone';
 import About from './pages/About';
 import IrrigationLog from './pages/IrrigationLog';
 
 export default function App() {
-  const [view, setView] = useState('dashboard');
+  const [view, setView] = useState('simulation');
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div>
       <div className="flex gap-2 px-6 pt-4">
+        <button
+          className={`text-sm px-3 py-1 rounded ${view === 'simulation' ? 'bg-emerald-700 text-white' : 'bg-gray-100'}`}
+          onClick={() => setView('simulation')}
+        >
+          Simulation
+        </button>
         <button
           className={`text-sm px-3 py-1 rounded ${view === 'dashboard' ? 'bg-emerald-700 text-white' : 'bg-gray-100'}`}
           onClick={() => setView('dashboard')}
@@ -37,6 +44,7 @@ export default function App() {
         </button>
       </div>
 
+      {view === 'simulation' && <Simulation />}
       {view === 'dashboard' && <Dashboard key={refreshKey} />}
       {view === 'create-zone' && <CreateZone onCreated={() => setRefreshKey((k) => k + 1)} />}
       {view === 'log' && <IrrigationLog />}
