@@ -30,7 +30,18 @@ Section 1 · Computer Science and Engineering (CSE), except Dereje Bogale (Softw
 - Rule-based irrigation advisor logic (no ML needed for a system this scale)
 
 **Simulated sensor pipeline**
-- A Node script (`backend/src/simulator/sensorSimulator.js`) generates realistic per-zone moisture readings and posts them to the API on an interval, standing in for real hardware (e.g. capacitive soil sensors on an ESP32) until it's wired up. It talks to the same `/api/readings` endpoint real sensors would use, so swapping in hardware later doesn't require changing the backend.
+- A Node script (`backend/src/simulator/sensorSimulator.js`) models a real sensor's measurement chain — per-zone-calibrated raw ADC drift, sensor noise, and a raw-to-percentage mapping matching real hardware — and posts readings to the API on an interval, standing in for physical sensors until they're wired up. It talks to the same `/api/readings` endpoint real sensors would use, and only applies a simulated "watering" effect when the backend's advisor actually returns `watered: true`, so the simulated physical world and the real decision logic never disagree.
+
+## Hardware Components
+
+| Component | Spec |
+|---|---|
+| Microcontroller | ESP32 DevKit v1 (12-bit ADC, built-in WiFi) |
+| Soil sensor | Capacitive soil moisture sensor v1.2/v2.0 (not resistive — avoids probe corrosion) |
+| Actuator | 1-channel 5V relay module + small DC water pump (or solenoid valve) |
+| Power | 5V/2A USB supply (ESP32) + separate supply matched to the pump's voltage |
+
+Full bill of materials, wiring diagram, calibration procedure, and a complete ESP32 firmware reference implementation are in **[HARDWARE.md](./HARDWARE.md)**.
 
 ## Project Structure
 
@@ -105,10 +116,11 @@ The frontend expects the backend at `http://localhost:5001/api` (configurable vi
 
 ## How It Works
 
-1. The simulator (or, later, real sensors) posts a moisture reading per zone to `POST /api/readings`.
-2. The backend stores it and runs it through the irrigation advisor, which flags a zone for watering if moisture drops below a configurable threshold (`MOISTURE_THRESHOLD` in `.env`), logging an irrigation event.
-3. The dashboard polls `/api/readings/latest` for live status cards and a Three.js 3D scene, and `/api/readings/history/:zoneId` for the moisture trend chart.
-4. In the 3D scene, each garden plot is color-coded (red = dry, amber = moderate, green = well-watered), and an animated sprinkler cue appears on zones currently below threshold.
+1. The simulator (or, later, real sensor firmware — see [HARDWARE.md](./HARDWARE.md)) posts a calibrated moisture reading per zone to `POST /api/readings`.
+2. The backend stores it and runs it through the irrigation advisor, which flags a zone for watering if moisture drops below that zone's own configurable threshold — and enforces a cooldown (`IRRIGATION_COOLDOWN_MINUTES`) so a zone sitting below threshold doesn't re-trigger a new watering event on every single reading, the same way a real pump needs time to run and water needs time to absorb before the next decision is meaningful.
+3. The API response includes `advisorResult.watered` — real firmware acts on this directly (pulsing a relay) rather than duplicating the threshold/cooldown logic locally, so changing a zone's threshold in the dashboard takes effect immediately without reflashing hardware.
+4. The dashboard polls `/api/readings/latest` for live status cards and a Three.js 3D scene, and `/api/readings/history/:zoneId` for the moisture trend chart.
+5. In the 3D scene, each garden plot is color-coded (red = dry, amber = moderate, green = well-watered), and an animated sprinkler cue appears on zones currently below threshold.
 
 ## IETP5201 Guide Compliance
 

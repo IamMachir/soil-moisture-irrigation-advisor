@@ -2,11 +2,14 @@ jest.mock('../src/models/zoneModel');
 jest.mock('../src/models/irrigationModel');
 
 const { getZoneById } = require('../src/models/zoneModel');
-const { logIrrigationEvent } = require('../src/models/irrigationModel');
+const { logIrrigationEvent, getMostRecentEventForZone } = require('../src/models/irrigationModel');
 const { evaluateZone } = require('../src/utils/irrigationAdvisor');
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Default: no prior irrigation event exists for the zone, so cooldown
+  // never blocks a test unless a test explicitly sets up a recent one.
+  getMostRecentEventForZone.mockResolvedValue(null);
 });
 
 describe('evaluateZone', () => {
@@ -59,5 +62,55 @@ describe('evaluateZone', () => {
 
     expect(result.threshold).toBe(30);
     expect(result.watered).toBe(true);
+  });
+
+  describe('cooldown behavior (prevents re-triggering a physical pump every reading)', () => {
+    it('does not re-water or log a new event if still within the cooldown window', async () => {
+      getZoneById.mockResolvedValue({ id: 1, moisture_threshold: 30 });
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      getMostRecentEventForZone.mockResolvedValue({
+        id: 1,
+        zone_id: 1,
+        triggered_by: 'auto',
+        started_at: twoMinutesAgo,
+      });
+
+      const result = await evaluateZone({ zoneId: 1, moisturePercent: 20 });
+
+      expect(result).toEqual({ watered: false, threshold: 30, withinCooldown: true });
+      expect(logIrrigationEvent).not.toHaveBeenCalled();
+    });
+
+    it('waters again once the cooldown window has passed', async () => {
+      getZoneById.mockResolvedValue({ id: 1, moisture_threshold: 30 });
+      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      getMostRecentEventForZone.mockResolvedValue({
+        id: 1,
+        zone_id: 1,
+        triggered_by: 'auto',
+        started_at: fifteenMinutesAgo,
+      });
+
+      const result = await evaluateZone({ zoneId: 1, moisturePercent: 20 });
+
+      expect(result).toEqual({ watered: true, threshold: 30 });
+      expect(logIrrigationEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('a manual watering event also starts the cooldown for subsequent auto-triggers', async () => {
+      getZoneById.mockResolvedValue({ id: 1, moisture_threshold: 30 });
+      const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+      getMostRecentEventForZone.mockResolvedValue({
+        id: 1,
+        zone_id: 1,
+        triggered_by: 'manual',
+        started_at: oneMinuteAgo,
+      });
+
+      const result = await evaluateZone({ zoneId: 1, moisturePercent: 20 });
+
+      expect(result.watered).toBe(false);
+      expect(logIrrigationEvent).not.toHaveBeenCalled();
+    });
   });
 });

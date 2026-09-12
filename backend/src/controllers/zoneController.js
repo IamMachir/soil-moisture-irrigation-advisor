@@ -9,6 +9,22 @@ async function listZones(req, res) {
   }
 }
 
+/**
+ * Returns a single zone's config. Intended for both the frontend and, once
+ * deployed, sensor firmware — a device can fetch its own zone's
+ * moisture_threshold on boot (before it has posted any reading yet) so it
+ * knows the threshold to compare against without hardcoding it in firmware.
+ */
+async function getZone(req, res) {
+  try {
+    const zone = await getZoneById(req.params.id);
+    if (!zone) return res.status(404).json({ error: 'Zone not found' });
+    res.json(zone);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch zone', details: err.message });
+  }
+}
+
 async function addZone(req, res) {
   try {
     const { name, locationNote, gridX, gridY, moistureThreshold } = req.body;
@@ -54,4 +70,4 @@ async function removeZone(req, res) {
   }
 }
 
-module.exports = { listZones, addZone, editZone, removeZone };
+module.exports = { listZones, getZone, addZone, editZone, removeZone };

@@ -1,10 +1,19 @@
 require('dotenv').config();
-const { logIrrigationEvent } = require('../models/irrigationModel');
+const { logIrrigationEvent, getMostRecentEventForZone } = require('../models/irrigationModel');
 const { getZoneById } = require('../models/zoneModel');
 
 // Fallback used only if a zone somehow has no threshold set (shouldn't happen
 // since the schema defaults new zones to 30%, but kept as a safety net).
 const DEFAULT_THRESHOLD = parseFloat(process.env.MOISTURE_THRESHOLD || '30');
+
+// Minimum time between auto-triggered watering events for the same zone.
+// This matters for real hardware: a relay-driven pump takes time to run and
+// water takes time to absorb into soil, so re-evaluating every few seconds
+// (the simulator's interval) must NOT fire the pump again on every single
+// reading while the zone is still below threshold — that would flood the
+// irrigation_events log and, on real hardware, chatter the relay/pump
+// on and off far faster than the physical system can usefully respond to.
+const COOLDOWN_MINUTES = parseFloat(process.env.IRRIGATION_COOLDOWN_MINUTES || '10');
 
 /**
  * Decide whether a zone needs watering, and log an irrigation event if so.
@@ -12,16 +21,34 @@ const DEFAULT_THRESHOLD = parseFloat(process.env.MOISTURE_THRESHOLD || '30');
  * plants might want a higher threshold), rather than one global setting.
  * This is the rule-based "advisor" — simple, explainable logic rather than
  * ML, which is appropriate for a low-cost campus-scale system.
+ *
+ * A cooldown window prevents re-triggering on every reading while a zone
+ * sits below threshold: once watering fires, it won't fire again for the
+ * same zone until COOLDOWN_MINUTES has passed, even if subsequent readings
+ * are still below threshold. This mirrors how a real pump/relay and
+ * absorption-into-soil delay work, and is also the signal firmware should
+ * use to decide whether to physically pulse a relay right now.
  */
 async function evaluateZone({ zoneId, moisturePercent }) {
   const zone = await getZoneById(zoneId);
   const threshold = zone ? Number(zone.moisture_threshold) : DEFAULT_THRESHOLD;
 
-  if (moisturePercent < threshold) {
-    await logIrrigationEvent({ zoneId, triggeredBy: 'auto', moistureBefore: moisturePercent });
-    return { watered: true, threshold };
+  if (moisturePercent >= threshold) {
+    return { watered: false, threshold };
   }
-  return { watered: false, threshold };
+
+  const recentEvent = await getMostRecentEventForZone(zoneId);
+  if (recentEvent) {
+    const minutesSinceLastEvent = (Date.now() - new Date(recentEvent.started_at).getTime()) / 60000;
+    if (minutesSinceLastEvent < COOLDOWN_MINUTES) {
+      // Still below threshold, but we already triggered watering recently —
+      // don't log another event or tell hardware to fire the pump again yet.
+      return { watered: false, threshold, withinCooldown: true };
+    }
+  }
+
+  await logIrrigationEvent({ zoneId, triggeredBy: 'auto', moistureBefore: moisturePercent });
+  return { watered: true, threshold };
 }
 
-module.exports = { evaluateZone, DEFAULT_THRESHOLD };
+module.exports = { evaluateZone, DEFAULT_THRESHOLD, COOLDOWN_MINUTES };

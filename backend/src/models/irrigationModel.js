@@ -20,4 +20,16 @@ async function getRecentEvents(limit = 20) {
   return rows;
 }
 
-module.exports = { logIrrigationEvent, getRecentEvents };
+// Used by the advisor's cooldown check: has this zone been watered recently,
+// regardless of trigger type? Prevents re-triggering a physical pump every
+// few seconds while a zone sits below threshold — a real relay/pump needs
+// time to run and for water to absorb before the next decision is useful.
+async function getMostRecentEventForZone(zoneId) {
+  const [rows] = await db.query(
+    'SELECT * FROM irrigation_events WHERE zone_id = ? ORDER BY started_at DESC LIMIT 1',
+    [zoneId]
+  );
+  return rows[0] || null;
+}
+
+module.exports = { logIrrigationEvent, getRecentEvents, getMostRecentEventForZone };
